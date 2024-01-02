@@ -2,3 +2,6 @@
 
 #untrack images
 *.png
+
+#this folder is used locally to test/improve the package
+exploration/
