@@ -76,3 +76,44 @@ range(a[2],b[2],50),(x,y)->ψ([x,y]),levels=[0.0],c=:green,seriestype=:contour,l
 scatter!(P2,x1,y1,c=:blue,label="Ω₁")
 scatter!(P2,x2,y2,c=:red,label="Ω₂")
 savefig(P2,"tutorial/example_2.png")
+
+
+#Example 3:
+#It is the same as example 1, but in three dimensions
+
+
+
+ψ(x)= x'*x-1.0 #the same as before 
+a,b=zeros(3), ones(3) 
+
+quad_order=5  
+
+xyz1,w1=algoim_nodes_weights(ψ,-1.0, a,b,quad_order)
+xyz2,w2=algoim_nodes_weights(ψ,+1.0, a,b,quad_order)
+
+x1,y1,z1= first.(xyz1),map(t->t[2],xyz1) , last.(xyz1) 
+x2,y2,z2= first.(xyz2) ,map(t->t[2],xyz2),  last.(xyz2) 
+
+#the unit cube
+A=[0,1,1,0,0]
+B=[0,0,1,1,0]
+C=[0,0,0,0,0]
+D=[1,1,1,1,1]
+P3=plot()
+plot!(P3,A,B,C,label="Ω",c=:black,axis=false,grid=false)
+plot!(P3,A,B,D,c=:black,label=nothing)
+plot!(P3,A,C,B,c=:black,label=nothing)
+plot!(P3,A,D,B,c=:black,label=nothing)
+
+P31=deepcopy(P3)
+P32=deepcopy(P3)
+scatter!(P31,x1,y1,z1,c=:blue,label="Ω₁")
+scatter!(P32,x2,y2,z2,c=:red,label="Ω₂")
+
+
+
+plot!(P31,camera=(60,15))
+
+# plot(P32,camera=(30,30))
+
+savefig(P31,"tutorial/example_3.png")

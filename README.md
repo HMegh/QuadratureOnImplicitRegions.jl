@@ -35,3 +35,15 @@ To plot the nodes, please see [this tutorial](https://github.com/Hmegh/Quadratur
      height=auto/>
 </p>
 
+The same syntax can be used for higher dimensional regions. For example, in the case of the intersection of the unit sphere and unit cube, we only need to adjust `a` and `b`:
+
+```julia
+using QuadratureOnImplicitRegions
+
+ψ(x)= x'*x-1.0 
+a,b=zeros(2), ones(2) #the unit interval. 
+quad_order=10
+
+xyz1,w1=algoim_nodes_weights(ψ,-1.0, a,b,quad_order)
+```
+For the outer region, we only need to change `-1.0` to `1.0`
