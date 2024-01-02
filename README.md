@@ -27,3 +27,10 @@ xy1,w1=algoim_nodes_weights(ψ,-1.0, a,b,quad_order)
 #the nodes and weights on Ω₂
 xy2,w2=algoim_nodes_weights(ψ,+1.0, a,b,quad_order)
 ```
+To plot the nodes, please see [this tutorial](https://github.com/Hmegh/QuadratureOnImplicitRegions.jl/blob/main/tutorial/circle_and_sphere.jl).
+
+<p align="center">
+  <img src="https://github.com/Hmegh/QuadratureOnImplicitRegions.jl/assets/8241188/8926d082-3b1c-48cb-a888-3882b1288f7f" width="250" 
+     height=auto/>
+</p>
+
