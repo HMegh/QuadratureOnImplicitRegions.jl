@@ -41,9 +41,17 @@ The same syntax can be used for higher dimensional regions. For example, in the 
 using QuadratureOnImplicitRegions
 
 ψ(x)= x'*x-1.0 
-a,b=zeros(2), ones(2) #the unit interval. 
-quad_order=10
+a,b=zeros(3), ones(3) #the unit cube. 
+quad_order=5 
 
 xyz1,w1=algoim_nodes_weights(ψ,-1.0, a,b,quad_order)
 ```
 For the outer region, we only need to change `-1.0` to `1.0`
+
+
+<p align="center">
+  <img src="https://github.com/Hmegh/QuadratureOnImplicitRegions.jl/assets/8241188/43354dab-7818-46eb-8ee2-c65b394b0369" width="250" 
+     height=auto/>
+</p>
+
+
