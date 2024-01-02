@@ -181,8 +181,8 @@ function algoim_nodes_weights(ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,
 
     x_tilde,w_tilde=algoim_nodes_weights(new_ψ_list,new_∇ψ_list,new_s_list,U_tilde,q);
 
-    x=[];
-    w=[];
+    x=Vector{Float64}[];
+    w=Float64[];
 
     for ii=1:length(x_tilde)
 
