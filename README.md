@@ -6,3 +6,24 @@ This package implements a quadrature method on implicitly defined regions follow
 
 [R. I. Saye, High-Order Quadrature Methods for Implicitly Defined Surfaces and Volumes in Hyperrectangles, SIAM Journal on Scientific Computing, 37(2), A993-A1019 (2015).](https://epubs.siam.org/doi/10.1137/140966290).
 
+
+---
+
+# Simple exmaples: 
+
+Let $\Omega=[0,1]^2$ and let $\psi(x,y)=x^2+y^2-1$. Our goal is to create quadrature nodes and weights on the subdomains: 
+$$
+\Omega_1=\left\{(x,y)\in \Omega : \psi(x,y)<0\right\},\qquad 
+\Omega_2=\left\{(x,y)\in \Omega : \psi(x,y)>0\right\}.
+$$
+
+```julia
+ψ(x)= x'*x-1.0 
+a,b=zeros(2), ones(2) #the unit interval. 
+quad_order=10
+
+#the nodes and weights on Ω₁
+xy1,w1=algoim_nodes_weights(ψ,-1.0, a,b,quad_order)
+#the nodes and weights on Ω₂
+xy2,w2=algoim_nodes_weights(ψ,+1.0, a,b,quad_order)
+```
