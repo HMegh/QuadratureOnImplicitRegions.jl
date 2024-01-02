@@ -17,7 +17,7 @@ end
 
 
 
-function algoim_nodes_weights(ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,U::Matrix,q::Integer)
+function algoim_nodes_weights(ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,U::Matrix,q::Integer,recursion_depth=1)
 
 
     d=size(U,2);
@@ -134,8 +134,9 @@ function algoim_nodes_weights(ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,
 
             Volume=prod(U[2,:] - U[1,:]);
 
-            if Volume<1e-3 #should be changed to something like #iterations>15
-                
+            # if Volume<1e-3 #should be changed to something like #iterations>15
+              if recursion_depth>=16
+
                 #flag=1 if psi_i*s_i>0 for all i
 
                 flag=prod([s_list[i]*ψ_list[i](xc)>0 for i=1:length(s_list)]);
@@ -164,8 +165,8 @@ function algoim_nodes_weights(ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,
             U1[2,kk]=(U[1,kk]+U[2,kk])/2.0;
             U2[1,kk]=(U[1,kk]+U[2,kk])/2.0;
             
-            x1,w1=algoim_nodes_weights(ψ_list,∇ψ_list,s_list,U1,q);
-            x2,w2=algoim_nodes_weights(ψ_list,∇ψ_list,s_list,U2,q);
+            x1,w1=algoim_nodes_weights(ψ_list,∇ψ_list,s_list,U1,q,recursion_depth+1);
+            x2,w2=algoim_nodes_weights(ψ_list,∇ψ_list,s_list,U2,q,recursion_depth+1);
 
             x=vcat(x1,x2); w=vcat(w1,w2);
 
