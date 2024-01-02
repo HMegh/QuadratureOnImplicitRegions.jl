@@ -17,6 +17,8 @@ $$\Omega_1=\left\\{(x,y)\in \Omega : \psi(x,y)<0\right\\},\qquad
 \Omega_2=\left\\{(x,y)\in \Omega : \psi(x,y)>0\right\\}.$$
 
 ```julia
+using QuadratureOnImplicitRegions
+
 ψ(x)= x'*x-1.0 
 a,b=zeros(2), ones(2) #the unit interval. 
 quad_order=10
