@@ -17,7 +17,7 @@ end
 
 
 
-function algoim_nodes_weights(ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,U::Matrix,q::Integer,recursion_depth=1)
+function algoim_nodes_weights(ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,U,q::Integer,recursion_depth=1)
 
 
     d=size(U,2);
