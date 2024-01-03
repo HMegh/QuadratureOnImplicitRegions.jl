@@ -47,15 +47,19 @@ function bisection(f,a,b)
     while abs(b-a)>eps(1.0)
         c=(a+b)/2;r=f(c);
 
+
+
         if r*p<0 
              b=c;q=r;
          else
              a=c;p=r; 
          end
          
+        if abs(p)<eps(1.0) return a end 
+        if abs(q)<eps(1.0) return b end
     end
 
-    return (a+b)/2;
+    return (a+b)/2.0;
 end
 
 
