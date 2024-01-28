@@ -59,7 +59,7 @@ function algoim_nodes_weights(ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,
                 ∇ψ_list=vcat(∇ψ_list[1:i-1],∇ψ_list[i+1:end]);
             else
                 #nothing 
-                return Vector{Float64}(undef,0),Vector{Float64}(undef,0);
+                return Vector{Float64}[],Float64[];
             end
         end
     end
@@ -152,7 +152,7 @@ function algoim_nodes_weights(ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,
                     return xc, Volume;
 
                 else
-                    return [], [];
+                    return Vector{Float64}[],Float64[];
                 end
             end
 
