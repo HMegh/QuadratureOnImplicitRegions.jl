@@ -1,7 +1,6 @@
 #instead of returning nodes and weights, we can integrate a function f directly.
 #this should be faster. 
 
-include("algoim_functions.jl")
 
 """
     int_f_1d(f,N,a,b)
