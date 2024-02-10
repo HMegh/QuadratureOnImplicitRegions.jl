@@ -60,7 +60,7 @@ end
 
 
 
-function algoim_quad(f,ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,U,q::Integer,recursion_depth=1)
+function algoim_quad(f,ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,U,q::Integer,recursion_depth=1)::Float64
 
     #integrate a function f 
     d=size(U,2);
@@ -91,7 +91,7 @@ function algoim_quad(f,ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,U,q::In
 
         #pruning
 
-        # if abs(ψ_xc)>=δ #does not prune certain cases such that norm(x)^2 on [0,1]
+        # if abs(ψ_xc)>=δ #does not prune certain cases such as norm(x)^2 on [0,1]
         if minimum(ψ_x)*maximum(ψ_x) >=0
 
             if s_list[i]*ψ_xc>=0

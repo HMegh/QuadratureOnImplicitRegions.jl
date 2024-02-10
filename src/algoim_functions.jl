@@ -12,8 +12,7 @@ function findroots(ψ_list,domain)
 
 
     Xsamples=range(a,b,20);
-    for jj=1:length(ψ_list)
-        ψ=ψ_list[jj];
+    for ψ in ψ_list
        
         samples=ψ.(Xsamples);
 
