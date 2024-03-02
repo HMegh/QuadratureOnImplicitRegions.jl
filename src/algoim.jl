@@ -9,14 +9,15 @@ import ForwardDiff
 function algoim_nodes_weights(ψ::Function,sgn::Number,a::Vector{Float64},b::Vector{Float64},q::Int) 
 
     U=vcat(a',b')
-    ∇ψ = x-> ForwardDiff.gradient(ψ,x)
+    @inline ∇ψ(x)= ForwardDiff.gradient(ψ,x)
     return algoim_nodes_weights([ψ],[∇ψ], [sgn],U,q)
 end
 
 
 
 
-function algoim_nodes_weights(ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,U,q::Integer,recursion_depth=1)
+function algoim_nodes_weights(ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,U,q::Integer,recursion_depth=1) 
+
 
 
     d=size(U,2);
