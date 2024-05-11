@@ -30,7 +30,7 @@ function findroots(ψ_list,domain)
     end
     return sort(Z);
 end
-function bisection(f,a,b)
+function bisection(f,a::T,b::T) where T<:Union{Float16,Float32,Float64}
 
 
     p=f(a);q=f(b);
@@ -43,7 +43,7 @@ function bisection(f,a,b)
 
    
 
-    while abs(b-a)>eps(1.0)
+    while abs(b-a)>eps(one(T))
         c=(a+b)/2;r=f(c);
 
 
@@ -54,69 +54,26 @@ function bisection(f,a,b)
              a=c;p=r; 
          end
          
-        if abs(p)<eps(1.0) return a end 
-        if abs(q)<eps(1.0) return b end
+        if abs(p)<eps(one(T)) return a end 
+        if abs(q)<eps(one(T)) return b end
     end
 
-    return (a+b)/2.0;
+    return (a+b)/2;
 end
 
 
-#The following functions is much slower than the one in FastGaussQuadrature
-# function lgwtjl(N,a,b)
-
-#     #adaptation of lgwt for MATLAB
-
-#     N1=N+1; N2=N+2;
-
-#     xu=range(-1,1,N1);
-
-#     y=cos.((2*(0:N) .+ 1)*pi/(2 * N+2))+(0.27/N1).*sin.(pi*xu*N/N2);
 
 
-#     L=zeros(N1,N2);
-#     Lp=zeros(N1,N2);
-
-
-#     y0=ones(N1);
-#     Lq=y0;
-
-#     while maximum(abs.(y .- y0))>eps(Float64)
-        
-        
-#         L[:,1].=1;
-#         Lp[:,1].=0;
-        
-#         L[:,2]=y;
-#         Lp[:,2].=1;
-        
-#         for k=2:N1
-#             L[:,k+1]=( (2*k-1)*y.*L[:,k]-(k-1)*L[:,k-1] )/k;
-#         end
-    
-#         Lq=(N2)*( L[:,N1]-y.*L[:,N2] )./(1 .- y.^2);   
-#         y0=y;
-#         y=y0 -L[:,N2]./Lq;
-        
-#     end
-
-#     x=(a*(1.0 .-y).+ b*(1.0 .+y))/2;      
-
-#     w=(b-a)./((1 .- y.^2).*Lq.^2)*(N2/N1)^2;
-#     return x,w;
-
-# end
-
-
-
-function lgwtjl(N,a,b)
-    x,w=gausslegendre(N)
-    x=(b-a)/2*x .+(a+b)/2
-    w=(b-a)/2*w
+function lgwtjl(N::Int,a::T,b::T) where T<:Union{Float16,Float32,Float64}
+    xref,wref=gausslegendre(N)
+    x=Vector{T}(undef,N)
+    w=Vector{T}(undef,N)
+    x.=(b-a)/2*xref .+(a+b)/2
+    w.=(b-a)/2*wref
     return x,w
 end
 
-function linsamples_creator(U,n)
+function linsamples_creator(U::Matrix{T},n::Int) where T<:Union{Float16,Float32,Float64}
     d=size(U,2);
 
     #linspaces in each direction
@@ -133,11 +90,11 @@ function linsamples_creator(U,n)
 end   
 
 
-function tensor_GL_rule(U,q)
+function tensor_GL_rule(U::Matrix{T},q::Int) where T<:Union{Float16,Float32,Float64}
 
 
     d=size(U,2);
-    xref, wref=lgwtjl(q,0,1);
+    xref, wref=lgwtjl(q,zero(T),one(T));
 
     X=[U[1,i] .+ xref .* (U[2,i]-U[1,i]) for i=1:d]; 
     W=[ wref .* (U[2,i]-U[1,i]) for i=1:d]; 
@@ -152,7 +109,7 @@ function tensor_GL_rule(U,q)
 
     return x,w
 end
-function d1_case(ψ_list,s_list,domain,q)
+function d1_case(ψ_list,s_list::Vector{T},domain::Array{T},q::Int) where T<:Union{Float16,Float32,Float64}
 
 
 
@@ -160,9 +117,8 @@ function d1_case(ψ_list,s_list,domain,q)
     #The one-dimensional case. s_list and psi_list
     # have the same length
     zer=findroots(ψ_list,domain);
-    x=Vector{Float64}(undef,0);
-    w=Vector{Float64}(undef,0);
-    flag=1;
+    x=Vector{T}(undef,0);
+    w=Vector{T}(undef,0);
 
     for i=1:length(zer)-1
         a=zer[i];b=zer[i+1];c=(a+b)/2;
@@ -170,8 +126,15 @@ function d1_case(ψ_list,s_list,domain,q)
         #I used count: if there is an instance where 
         # psi_i(c)*s_i<0, then flag is 0. 
 
-        flag=count([s_list[i]*ψ_list[i](c)<0 
-                for i=1:length(s_list)])==0;
+        flag=true
+
+        # flag=count([s_list[i]*ψ_list[i](c)<0 
+        #         for i=1:length(s_list)])==0;
+
+        for i=1:length(s_list) 
+            if s_list[i]*ψ_list[i](c)<0 flag=false end
+        end
+
 
         if flag #psi_i(c)s_i>0 for all i
 
