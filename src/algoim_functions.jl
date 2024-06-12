@@ -38,6 +38,14 @@ function find_roots(ψ::F,a::T,b::T) where {F,T}
     for i=1:n if ψ(a+i*h)==0 push!(Z,a+i*h) end end 
 
     sort!(Z)
+
+    #remove duplicates
+    for i=length(Z):-1:2
+        if abs(Z[i]-Z[i-1])≤4eps(T)
+            deleteat!(Z,i)
+        end
+    end
+
     return Z
 
 end
