@@ -29,7 +29,7 @@ Returns multiple roots of ψ in the open interval `[a,b]`
 """
 function find_roots(ψ::F,a::T,b::T) where {F,T}
 
-    n=20 #split the interval [a,b] into n sub-intervals
+    n=10 #split the interval [a,b] into n sub-intervals
     h=(b-a)/n
     Z=Vector{Float64}(undef,0)
     for i=0:n-1
@@ -218,7 +218,7 @@ function remove_kth(x::T,k::I) where {I,T<:Number}
 end
 
 function insert_kth(x::V,k::I,t::T) where {I,V<:AbstractVector,T<:Number}
-    [x[1:k-1];t;x[k:end]]
+    [@view x[1:k-1];t;@view x[k:end]]
 end
 
 function insert_kth(x::N,k::I,t::S) where {N<:Number,I,S<:Number}
