@@ -1,12 +1,15 @@
 sgn(m,s,σ)= ( m==σ*s ? σ*m : 0.0)
 
 
+find_root(ψ::F,a::T,b::T) where {F,T<:Integer} = find_root(ψ,Float64(a),Float64(b))
+
+
 """
     find_root(ψ::F,a::T,b::T) 
     
 Finds a root of a function ψ in the open interval `(a,b)`
 """
-function find_root(ψ::F,a::T,b::T) where {F,T}
+function find_root(ψ::F,a::T,b::T) where {F,T<:AbstractFloat}
     if ψ(a)*ψ(b)≥0 error("Find_root failed: Choose a smaller interval") end 
 
     c=b
