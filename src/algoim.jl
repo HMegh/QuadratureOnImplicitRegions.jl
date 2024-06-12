@@ -70,10 +70,12 @@ function algoim_nodes_weights(ψ_list,s_list,U::Matrix{T},x_ref,w_ref,recursion_
 
         δ[:] .=fill(-Inf,d)
 
-        g[:] .=ForwardDiff.gradient(ψ,xc)
+        # g[:] .=ForwardDiff.gradient(ψ,xc)
+        finite_difference_gradient!(g,ψ,xc)
 
         for i in axes(Samples,2)
-            gtemp[:] .=ForwardDiff.gradient(ψ,Samples[:,i])
+            # gtemp[:] .=ForwardDiff.gradient(ψ,Samples[:,i])
+            finite_difference_gradient!(gtemp,ψ, @view Samples[:,i])
             for kk=1:d 
                 δ[kk]=max(δ[kk],abs(gtemp[kk]-g[kk]))
             end
@@ -134,11 +136,6 @@ function algoim_nodes_weights(ψ_list,s_list,U::Matrix{T},x_ref,w_ref,recursion_
     
     x_tilde,w_tilde=algoim_nodes_weights(new_ψ_list,new_s_list,U_tilde,x_ref,w_ref) #(d-1)xN  matrix 
 
-
-    N=size(x_tilde,2)
-    
-    w=Float64[]
-    x=Matrix{T}(undef,d,0)
 
     QQ=Vector{T}(undef,d-1)
 
