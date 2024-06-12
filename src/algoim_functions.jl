@@ -96,6 +96,33 @@ function shifted_gl!(x_ref::Vector{T},w_ref::Vector{T},a::T,b::T,x::Vector{T},w:
     return 
 end
 
+""" 
+    d1_count_subintervals(ψ_list,s_list,domain)
+
+Counts how many sub-intervals of domain satisfiy s_iψ_i≥0
+"""
+function  d1_count_subintervals(ψ_list,s_list,domain)
+    Z=find_roots(ψ_list,domain[1],domain[2])
+    cnt=0
+
+    n=length(Z)
+    for i=1:n-1
+        a=Z[i];b=Z[i+1];c=(a+b)/2
+
+        flag=true 
+        for i in eachindex(ψ_list) 
+            if s_list[i]*ψ_list[i](c)<0
+                flag=false;break;
+            end
+        end    
+        if flag
+            cnt+=1
+        end
+    end 
+
+    return cnt
+end
+
 
 """
     d1_case(ψ_list,s_list,domain,x_ref,w_ref)
