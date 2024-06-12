@@ -1,5 +1,9 @@
 sgn(m,s,σ)= ( m==σ*s ? σ*m : 0.0)
 
+find_root(ψ::F,a::T,b::T) where {F,T<:Integer} = find_root(ψ,Float64(a),Float64(b))
+find_roots(ψ::F,a::T,b::T) where {F,T<:Integer} = find_roots(ψ,Float64(a),Float64(b))
+find_roots(ψ_list::Vector{F},a::T,b::T) where {F,T<:Integer} = find_roots(ψ_list,Float64(a),Float64(b))
+
 
 find_root(ψ::F,a::T,b::T) where {F,T<:Integer} = find_root(ψ,Float64(a),Float64(b))
 
@@ -28,7 +32,7 @@ Returns multiple roots of ψ in the open interval `[a,b]`
 """
 function find_roots(ψ::F,a::T,b::T) where {F,T}
 
-    n=20 #split the interval [a,b] into n sub-intervals
+    n=10 #split the interval [a,b] into n sub-intervals
     h=(b-a)/n
     Z=Vector{Float64}(undef,0)
     for i=0:n-1
@@ -93,6 +97,33 @@ function shifted_gl!(x_ref::Vector{T},w_ref::Vector{T},a::T,b::T,x::Vector{T},w:
     for i in eachindex(x) x[i]=(a+b)/2+(b-a)/2*x_ref[i] end
     for i in eachindex(w) w[i]=(b-a)/2*w_ref[i] end
     return 
+end
+
+""" 
+    d1_count_subintervals(ψ_list,s_list,domain)
+
+Counts how many sub-intervals of domain satisfiy s_iψ_i≥0
+"""
+function  d1_count_subintervals(ψ_list,s_list,domain)
+    Z=find_roots(ψ_list,domain[1],domain[2])
+    cnt=0
+
+    n=length(Z)
+    for i=1:n-1
+        a=Z[i];b=Z[i+1];c=(a+b)/2
+
+        flag=true 
+        for i in eachindex(ψ_list) 
+            if s_list[i]*ψ_list[i](c)<0
+                flag=false;break;
+            end
+        end    
+        if flag
+            cnt+=1
+        end
+    end 
+
+    return cnt
 end
 
 
@@ -190,7 +221,7 @@ function remove_kth(x::T,k::I) where {I,T<:Number}
 end
 
 function insert_kth(x::V,k::I,t::T) where {I,V<:AbstractVector,T<:Number}
-    [x[1:k-1];t;x[k:end]]
+    [@view x[1:k-1];t;@view x[k:end]]
 end
 
 function insert_kth(x::N,k::I,t::S) where {N<:Number,I,S<:Number}

@@ -68,12 +68,15 @@ function algoim_nodes_weights(ψ_list,s_list,U::Matrix{T},x_ref,w_ref,recursion_
     for i in eachindex(s_list)
         ψ=ψ_list[i]
 
-        δ[:] .=fill(-Inf,d)
+        # δ[:] .=fill(-Inf,d)
+        fill!(δ,-Inf)
 
-        g[:] .=ForwardDiff.gradient(ψ,xc)
+        # g[:] .=ForwardDiff.gradient(ψ,xc)
+        finite_difference_gradient!(g,ψ,xc)
 
         for i in axes(Samples,2)
-            gtemp[:] .=ForwardDiff.gradient(ψ,Samples[:,i])
+            # gtemp[:] .=ForwardDiff.gradient(ψ,Samples[:,i])
+            finite_difference_gradient!(gtemp,ψ, @view Samples[:,i])
             for kk=1:d 
                 δ[kk]=max(δ[kk],abs(gtemp[kk]-g[kk]))
             end
@@ -89,9 +92,11 @@ function algoim_nodes_weights(ψ_list,s_list,U::Matrix{T},x_ref,w_ref,recursion_
             si_U=sgn(g[k],s_list[i],1);
 
 
-            new_ψ_list=vcat(new_ψ_list,ψ_L,ψ_U); 
-            new_s_list=vcat(new_s_list,si_L,si_U)
-            
+            # new_ψ_list=vcat(new_ψ_list,ψ_L,ψ_U); 
+            # new_s_list=vcat(new_s_list,si_L,si_U)
+            push!(new_ψ_list,ψ_L,ψ_U)
+            push!(new_s_list,si_L,si_U)
+
         else #subdivide the domain (unless it is too small)
             Volume=prod(U[2,:] - U[1,:]);
 
@@ -135,34 +140,47 @@ function algoim_nodes_weights(ψ_list,s_list,U::Matrix{T},x_ref,w_ref,recursion_
     x_tilde,w_tilde=algoim_nodes_weights(new_ψ_list,new_s_list,U_tilde,x_ref,w_ref) #(d-1)xN  matrix 
 
 
-    N=size(x_tilde,2)
-    
-    w=Float64[]
-    x=Matrix{T}(undef,d,0)
-
     QQ=Vector{T}(undef,d-1)
 
     #This part is the one using 90% of the allocations 
 
+    #estimate the number of nodes
+    cnt=0
     for ii in axes(x_tilde,2)
-        QQ[:] .= x_tilde[:,ii] #(d-1) vector
-        PP=w_tilde[ii]
-        ψ_list_tilde=
-        [t->ψ(insert_kth(QQ,k,t)) for ψ in ψ_list]
+        QQ[:] .=@view x_tilde[:,ii] #(d-1) vector
+        # PP=w_tilde[ii]
+        ψ_list_tilde=[t->ψ(insert_kth(QQ,k,t)) for ψ in ψ_list]
+        cnt+=d1_count_subintervals(ψ_list_tilde,s_list,[xkL;xkU])
 
+
+      
+    end
+
+    x=Matrix{T}(undef,d,cnt*length(x_ref))
+    w=Vector{T}(undef,cnt*length(x_ref))
+
+
+    j=1
+    for ii in axes(x_tilde,2)
+        QQ[:] .=@view x_tilde[:,ii]
+        PP=w_tilde[ii]
+
+        ψ_list_tilde=[t->ψ(insert_kth(QQ,k,t)) for ψ in ψ_list]
         x_slice,w_slice=d1_case(ψ_list_tilde,s_list,[xkL;xkU],x_ref,w_ref)
+        
         n=length(w_slice)
 
         if isempty(w_slice) continue end
 
-        append!(w,PP*w_slice)
+        w[j:j+n-1] .= PP*w_slice 
+        # x[:,j:j+n] = [repeat(QQ[1:k-1],1,n);x_slice;repeat(QQ[k:end],1,n)]
+        x[1:k-1,j:j+n-1] = repeat(QQ[1:k-1],1,n)
+        x[k,j:j+n-1] = x_slice
+        x[k+1:end,j:j+n-1] = repeat(QQ[k:end],1,n)
+        j+=n
 
-        #TODO The following uses many allocations. 
-        xloc= [repeat(QQ[1:k-1],1,n);x_slice;repeat(QQ[k:end],1,n)]
-
-        
-        x=hcat(x,xloc)
     end
+
 
     return x,w
 
