@@ -11,7 +11,7 @@ function find_root(ψ::F,a::T,b::T) where {F,T}
 
     c=b
     cnext=(a+b)/2
-    while !(c≈cnext) 
+    while abs(c-cnext)>4eps(T) 
         c=cnext
         cnext=cnext-ψ(cnext)/ForwardDiff.derivative(ψ,cnext)
     end
