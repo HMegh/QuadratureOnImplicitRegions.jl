@@ -92,9 +92,11 @@ function algoim_nodes_weights(ψ_list,s_list,U::Matrix{T},x_ref,w_ref,recursion_
             si_U=sgn(g[k],s_list[i],1);
 
 
-            new_ψ_list=vcat(new_ψ_list,ψ_L,ψ_U); 
-            new_s_list=vcat(new_s_list,si_L,si_U)
-            
+            # new_ψ_list=vcat(new_ψ_list,ψ_L,ψ_U); 
+            # new_s_list=vcat(new_s_list,si_L,si_U)
+            push!(new_ψ_list,ψ_L,ψ_U)
+            push!(new_s_list,si_L,si_U)
+
         else #subdivide the domain (unless it is too small)
             Volume=prod(U[2,:] - U[1,:]);
 
