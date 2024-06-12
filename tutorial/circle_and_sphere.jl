@@ -20,9 +20,9 @@ xy2,w2=algoim_nodes_weights(ψ,+1.0, a,b,quad_order)
 @test sum(w1)≈ π/4 
 @test sum(w2)≈ (1-π/4)
 
-#xy a vector of vectors:
-x1,y1= first.(xy1) , last.(xy1) 
-x2,y2= first.(xy2) , last.(xy2) 
+#xy a matrix (each column is a node):
+x1,y1= xy1[1,:] , xy1[2,:]
+x2,y2= xy2[1,:]  , xy2[2,:]
 
 #visualize the quadrature nodes:
 
@@ -63,8 +63,8 @@ xy2,w2=algoim_nodes_weights(ψ,+1.0, a,b,quad_order)
 
 
 #plotting the quad points as before
-x1,y1= first.(xy1) , last.(xy1) 
-x2,y2= first.(xy2) , last.(xy2) 
+x1,y1= xy1[1,:] , xy1[2,:]
+x2,y2= xy2[1,:]  , xy2[2,:]
 
 
 rect_x=[a[1],b[1],b[1],a[1],a[1]]
@@ -91,8 +91,9 @@ quad_order=5
 xyz1,w1=algoim_nodes_weights(ψ,-1.0, a,b,quad_order)
 xyz2,w2=algoim_nodes_weights(ψ,+1.0, a,b,quad_order)
 
-x1,y1,z1= first.(xyz1),map(t->t[2],xyz1) , last.(xyz1) 
-x2,y2,z2= first.(xyz2) ,map(t->t[2],xyz2),  last.(xyz2) 
+x1,y1,z1= xyz1[1,:],xyz1[2,:],xyz1[3,:]
+x2,y2,z2= xyz2[1,:],xyz2[2,:],xyz2[3,:]
+ 
 
 #the unit cube
 A=[0,1,1,0,0]
