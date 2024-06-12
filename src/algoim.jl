@@ -68,7 +68,8 @@ function algoim_nodes_weights(ψ_list,s_list,U::Matrix{T},x_ref,w_ref,recursion_
     for i in eachindex(s_list)
         ψ=ψ_list[i]
 
-        δ[:] .=fill(-Inf,d)
+        # δ[:] .=fill(-Inf,d)
+        fill!(δ,-Inf)
 
         # g[:] .=ForwardDiff.gradient(ψ,xc)
         finite_difference_gradient!(g,ψ,xc)
