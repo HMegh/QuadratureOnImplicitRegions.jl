@@ -3,47 +3,66 @@
 
 
 """
-    int_f_1d(f,N,a,b)
+    int_f_1d(f,N,a,b,x_ref,w_ref)
 
-    integrate f(x) on [a,b] using N quadrature points 
+    integrate f(x) on [a,b] using a reference quadrature x_ref,w_ref
 """
-function int_f_1d(f,N,a,b)
-     x,w=lgwtjl(N,a,b)
-     return w'*f.(x)
+function int_f_1d(f,a,b,x_ref,w_ref)
+    s=0.0;
+    for i in eachindex(x_ref,w_ref)
+        s+=(b-a)/2*w_ref[i]*f((a+b)/2+x_ref[i]*(b-a)/2)
+    end
+    s
 end
 
-# int_f_1d(x->x^3,4,0,1) ==1/4
-# int_f_1d(x->sin(x),10,0,π) ==2
-# int_f_1d(x->x^3,4,1,3) ==20
-
-function d1_int_f(f,ψ_list,s_list,domain,q)
+function d1_int_f(f,ψ_list,s_list,domain,x_ref,w_ref)
     #The one-dimensional case. s_list and psi_list
     # have the same length
-    zer=findroots(ψ_list,domain);
-    flag=1;
+    Z=find_roots(ψ_list,domain[1],domain[2])
+    
     s=0.0
 
-    for i=1:length(zer)-1
-        a=zer[i];b=zer[i+1];c=(a+b)/2;
-        #check to see if s_i*psi_i(c)>0 for all i      
-        #I used count: if there is an instance where 
-        # psi_i(c)*s_i<0, then flag is 0. 
+    n=length(Z)
 
-
-        flag=count([s_list[i]*ψ_list[i](c)<0 
-                for i=1:length(s_list)])==0;
-
-        if flag #psi_i(c)s_i>0 for all i
-
-           s+=int_f_1d(f,q,a,b)
-        end
-    end
     
+    for i=1:n-1
+        a=Z[i];b=Z[i+1];c=(a+b)/2
+
+        flag=true 
+        for i in eachindex(ψ_list) 
+            if s_list[i]*ψ_list[i](c)<0
+                flag=false;break;
+            end
+        end    
+
+        if flag
+            s+=int_f_1d(f,a,b,x_ref,w_ref)
+        end
+    end 
 
     return s
     
 end
+"""
+    tensor_GL_int_f(f,U,x_ref,w_ref)
 
+Integrate a function f on a cuboid U using a reference quadrature x_ref,w_ref
+"""
+
+function tensor_GL_int_f(f,U,x_ref,w_ref)
+    d=size(U,2)
+    n=size(x_ref,1)
+
+    X=[(U[1,i]+U[2,i])/2 .+ x_ref .* (U[2,i]-U[1,i])/2 for i=1:d]
+    W=[ w_ref/2 .* (U[2,i]-U[1,i]) for i=1:d]
+
+    x_tuples=collect(Iterators.product(X...))
+
+    W=[prod(A) for A in Iterators.product(W...)]
+
+    return sum(f(x_tuples[i])*W[i] for i in eachindex(x_tuples,W))
+
+end
 
 # d1_int_f(x->x^3,[x->x-1.5],[-1],[0,2],10)≈ 1.5^4/4
 
@@ -52,7 +71,6 @@ function algoim_quad(f::Function,ψ::Function,sgn::Number,a,b,q::Integer)
     
     U=vcat(a',b')
 
-    ∇ψ=x->  ForwardDiff.gradient(ψ,x)
     return algoim_quad(f,[ψ],[∇ψ],[sgn],U,q)
 end
 
@@ -60,23 +78,23 @@ end
 
 
 
-function algoim_quad(f,ψ_list::Vector,∇ψ_list::Vector,s_list::Vector,U,q::Integer,recursion_depth=1)::Float64
+function algoim_quad(f,ψ_list,∇ψ_list,s_list,U,q,recursion_depth=1)::Float64
 
+    x_ref,w_ref=gausslegendre(q)
     #integrate a function f 
     d=size(U,2);
     if d==1
-        return d1_int_f(f,ψ_list,s_list,U,q);
+        return d1_int_f(f,ψ_list,s_list,U,x_ref,w_ref);
     end
 
 
     xc=(U[1,:] + U[2,:])/2
 
-    n_samples=15625;
-    n_samples=4096;#less samples: faster
-    n_samples=729;#less samples: faster
+  
+    n_samples=100;#less samples: faster
 
-    nnsamples=Int(round(n_samples^(1/d)));
-
+    n_samples=100; #total number of samples 
+    nnsamples=Int(round(n_samples^(1/d))) # number of samples per dimension
     Samples=linsamples_creator(U,nnsamples)
 
     for i=length(s_list):-1:1
