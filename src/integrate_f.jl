@@ -1,6 +1,7 @@
 #instead of returning nodes and weights, we can integrate a function f directly.
 #this should be faster. 
 
+using RectiGrids #0 allocations cartesian products
 
 """
     int_f_1d(f,N,a,b,x_ref,w_ref)
@@ -50,195 +51,161 @@ Integrate a function f on a cuboid U using a reference quadrature x_ref,w_ref
 """
 
 function tensor_GL_int_f(f,U,x_ref,w_ref)
-    d=size(U,2)
-    n=size(x_ref,1)
+  
+  
+    
+    X=[muladd.(x_ref,(U[2,i]-U[1,i])/2,(U[1,i]+U[2,i])/2) for i in axes(U,2)]
 
-    X=[(U[1,i]+U[2,i])/2 .+ x_ref .* (U[2,i]-U[1,i])/2 for i=1:d]
-    W=[ w_ref/2 .* (U[2,i]-U[1,i]) for i=1:d]
+    W= [ (U[2,i]-U[1,i])/2 *w_ref for i in axes(U,2)]
 
-    x_tuples=collect(Iterators.product(X...))
+    x_tuples=grid(X...)
+    w_tuples=grid(W...)
 
-    W=[prod(A) for A in Iterators.product(W...)]
 
-    return sum(f(x_tuples[i])*W[i] for i in eachindex(x_tuples,W))
+    return sum(f(x_tuples[i])*prod(w_tuples[i]) for i in eachindex(x_tuples,w_tuples))
 
 end
 
 # d1_int_f(x->x^3,[x->x-1.5],[-1],[0,2],10)≈ 1.5^4/4
 
 
-function algoim_quad(f::Function,ψ::Function,sgn::Number,a,b,q::Integer)
-    
+function algoim_quad(f,ψ,sgn,a,b,q)
     U=vcat(a',b')
+    x_ref,w_ref=gausslegendre(q)
 
-    return algoim_quad(f,[ψ],[∇ψ],[sgn],U,q)
+
+    return algoim_quad(f,[ψ],[sgn],U,x_ref,w_ref)
 end
 
 
 
 
 
-function algoim_quad(f,ψ_list,∇ψ_list,s_list,U,q,recursion_depth=1)::Float64
+function algoim_quad(f::F,ψ_list,s_list::Vector{T},U::M,x_ref,w_ref,recursion_depth=1) where {T<:Number,M<:AbstractMatrix,F<:Function}
 
-    x_ref,w_ref=gausslegendre(q)
     #integrate a function f 
     d=size(U,2);
     if d==1
-        return d1_int_f(f,ψ_list,s_list,U,x_ref,w_ref);
+        return d1_int_f(f,ψ_list,s_list,U,x_ref,w_ref)
     end
 
-
-    xc=(U[1,:] + U[2,:])/2
-
-  
-    n_samples=100;#less samples: faster
+    xc=(U[1,:] + U[2,:])/2 #midpoint
 
     n_samples=100; #total number of samples 
     nnsamples=Int(round(n_samples^(1/d))) # number of samples per dimension
     Samples=linsamples_creator(U,nnsamples)
 
     for i=length(s_list):-1:1
-        ψ=ψ_list[i];
+        ψ=ψ_list[i]
+        min_ψ=minimum(ψ(x) for x in eachcol(Samples))
+        max_ψ=maximum(ψ(x) for x in eachcol(Samples))
 
-        ψ_xc=ψ(xc);
-
-        ψ_x=ψ.(Samples) 
-
-        δ=maximum(abs.(ψ_x .- ψ_xc));
-        # println("ψ_xc =$ψ_xc  ,δ = $δ")
-
-        #pruning
-
-        # if abs(ψ_xc)>=δ #does not prune certain cases such as norm(x)^2 on [0,1]
-        if minimum(ψ_x)*maximum(ψ_x) >=0
-
-            if s_list[i]*ψ_xc>=0
-                #remove \psi_i
-                s_list=vcat(s_list[1:i-1],s_list[i+1:end]);
-                ψ_list=vcat(ψ_list[1:i-1],ψ_list[i+1:end]);
-                ∇ψ_list=vcat(∇ψ_list[1:i-1],∇ψ_list[i+1:end]);
+        #= 
+        Here, I deviated a bit from the paper, to make the case ψ(x)=norm(x)^2 works on [0,ε]^d 
+        =#
+        if min_ψ*max_ψ≥0
+            if s_list[i]*ψ(xc)≥0 
+                s_list=deleteat!(copy(s_list),i)
+                ψ_list=deleteat!(copy(ψ_list),i)
             else
-                #nothing 
-                return 0.0;
+                return 0.0#TODO: change 0.0 to zero(T)
             end
         end
+
     end
 
     if isempty(s_list)
-        x,w=tensor_GL_rule(U,q);
-        return w'*f.(x);
+        return tensor_GL_int_f(f,U,x_ref,w_ref)
     end
-
-
+        
     new_ψ_list=Vector{Function}(undef,0)
-    new_∇ψ_list=Vector{Function}(undef,0)
     new_s_list=Vector{Float64}(undef,0)
 
-        
-
+    #the direction of the most change in ψ_1
     ψ_1=ψ_list[1];
-    ∇ψ_1=∇ψ_list[1];
+    k=argmax(abs.(ForwardDiff.gradient(ψ_1,xc)))
 
-    #this does not strike me as the best method to choose k
-    k=argmax(abs.(∇ψ_1(xc)))
-    # println("dimension $(length(xc)), direction chosen $k, U=$U")
-    
-    # k=argmax(abs.(sum(∇ψ_1.(Samples))))
-
+ 
     xkL=U[1,k];
     xkU=U[2,k];
 
-    for i=1:length(s_list)
+    g=zeros(d)
+    gtemp=zeros(d)
+    δ=fill(-Inf,d)
+    for i in eachindex(s_list)
         ψ=ψ_list[i]
-        ∇ψ=∇ψ_list[i]
 
-        g=∇ψ(xc);
+        # δ[:] .=fill(-Inf,d)
+        fill!(δ,-Inf)
 
-        ∇ψ_x=hcat([∇ψ(Samples[ii])  for ii=1:n_samples]...)
+        # g[:] .=ForwardDiff.gradient(ψ,xc)
+        finite_difference_gradient!(g,ψ,xc)
 
-        
-        #\delta is the max on each row
-        δ=[maximum(abs.(∇ψ_x[kk,:] .- g[kk])) for kk=1:d]
-
+        for i in axes(Samples,2)
+            # gtemp[:] .=ForwardDiff.gradient(ψ,Samples[:,i])
+            finite_difference_gradient!(gtemp,ψ, @view Samples[:,i])
+            for kk=1:d 
+                δ[kk]=max(δ[kk],abs(gtemp[kk]-g[kk]))
+            end
+        end
+    
 
         if abs(g[k])>δ[k]&& norm(g + δ)^2/(g[k]-δ[k])^2<20
-
-
-
-            #The restriction to the faces in the e_k direction.
-
-            #I am using  [x][1:k-1] instead of x[1:k-1] since 
-            # Vector[1:0] is well defined (empty array) but Number[1:0] is not. 
-            
 
             ψ_L=(x->ψ(insert_kth(x,k,xkL)))
             ψ_U=(x->ψ(insert_kth(x,k,xkU)))
 
-            ∇ψ_L=x->remove_kth(∇ψ(insert_kth(x,k,xkL)),k)
-            ∇ψ_U=x->remove_kth(∇ψ(insert_kth(x,k,xkU)),k)
-            
-            
-
-            # println("xkL,xkU=$xkL, $xkU , psi L and psi U defined")
-
-            
-
             si_L=sgn(g[k],s_list[i],-1);
             si_U=sgn(g[k],s_list[i],1);
 
-            new_ψ_list=vcat(new_ψ_list,ψ_L,ψ_U); 
-            new_∇ψ_list=vcat(new_∇ψ_list,∇ψ_L,∇ψ_U); 
-            new_s_list=vcat(new_s_list,si_L,si_U)
 
-        else
+            # new_ψ_list=vcat(new_ψ_list,ψ_L,ψ_U); 
+            # new_s_list=vcat(new_s_list,si_L,si_U)
+            push!(new_ψ_list,ψ_L,ψ_U)
+            push!(new_s_list,si_L,si_U)
 
+        else #subdivide the domain (unless it is too small)
             Volume=prod(U[2,:] - U[1,:]);
 
-            # if Volume<1e-3 #should be changed to something like #iterations>15
-              if recursion_depth>=16
-
-                #flag=1 if psi_i*s_i>0 for all i
-
-                flag=prod([s_list[i]*ψ_list[i](xc)>0 for i=1:length(s_list)]);
-                # display(flag)
-                # display(∇ψ_x)
-                # println("xc= $xc, ψ=[ $(ψ_list[1](xc))]")
-                # println(" ψ(0,0)= $(ψ_list[1]([0,0.0]))")
-                 printstyled("Warning: lower order method used in $U\n";color=:red)
-
-                #  println((g,δ,k,abs(g[k]), δ[k], norm(g + δ)^2/(g[k]-δ[k])^2))
-                if flag #low order method
-                    
-                    return f(xc)*Volume;
-
-                else
-                    return 0.0;
+            if recursion_depth>=16
+                flag=true
+                for i in eachindex(s_list)
+                    if s_list[i]*ψ_list[i](xc)<= 0 flag=false end
                 end
-            end
 
-            # println("Domain split into two")
+                printstyled("Warning: lower order method used in $U\n";color=:red)
 
-            kk=argmax(U[2,:]-U[1,:]);
+                if flag
+                    return f(xc)*Volume 
+                else
+                    return 0.0
+                end
+            end 
 
-            U1=deepcopy(U);U2=deepcopy(U);
+            kk=argmax(U[2,:]-U[1,:])
+            U1=copy(U);U2=copy(U);
 
             U1[2,kk]=(U[1,kk]+U[2,kk])/2.0;
             U2[1,kk]=(U[1,kk]+U[2,kk])/2.0;
-            
-            i1=algoim_quad(f,ψ_list,∇ψ_list,s_list,U1,q,recursion_depth+1);
-            i2=algoim_quad(f,ψ_list,∇ψ_list,s_list,U2,q,recursion_depth+1);
-            return i1+i2; 
 
+
+
+            I1=algoim_quad(f,ψ_list,s_list,U1,x_ref,w_ref,recursion_depth+1)
+            I2=algoim_quad(f,ψ_list,s_list,U2,x_ref,w_ref,recursion_depth+1)
+
+          
+            
+           
+            return I1+I2
         end
 
-
-        
     end
+
 
     U_tilde=hcat(U[:,1:k-1],U[:,k+1:end]);
     
-    F_tilde=x->F1d(x,f,ψ_list,s_list,k,xkL,xkU,q)
-    return algoim_quad(F_tilde, new_ψ_list,new_∇ψ_list,new_s_list,U_tilde,q)
+    F_tilde(x)= F1d(x,f,ψ_list,s_list,k,xkL,xkU,x_ref,w_ref)
+    return algoim_quad(F_tilde, new_ψ_list,new_s_list,U_tilde,x_ref,w_ref)
 
 
    
@@ -246,22 +213,53 @@ function algoim_quad(f,ψ_list,∇ψ_list,s_list,U,q,recursion_depth=1)::Float64
 end
 
 
-function restrict(x::Vector,t::Number,k::Integer)#replace x[k] by t
-    return vcat(x[1:k-1],t,x[k+1:end])
+function restrict(x::V,t::N,k::I) where {V<:AbstractVector,N,I}#replace x[k] by t
+    # return vcat(x[1:k-1],t,x[k+1:end])
+    z=copy(x)
+    z[k]=t
+    return z
 end
 
-function restrict(x::Number,t::Number,k::Integer)#replace x[k] by t
-   if k==1 return [t,x] end
-   if k==2 return [x,t] end
+"""
+    restrict!(x::V,t::N,k::I,z_temp::V) where {V<:AbstractVector,N,I}
+    x: vector of size d.
+    z: vector of size d. 
+
+    z[1:k-1] =x[1:k-1]
+    z[k]=t 
+    z[k+1:end]= x[k:end]
+"""
+
+function restrict!(z,x::V,t::N,k::I) where {V<:AbstractVector,N,I}
+    for i=1:k-1 z[i]=x[i] end 
+    z[k]=t
+    for i=k:length(x) z[i+1]=x[i] end
+    return z
+end
+
+function restrict(x::V,t::N,k::I) where {V<:Number,N,I}#replace x[k] by t
+    # return vcat(x[1:k-1],t,x[k+1:end])
+   if k==1 return [t;x] end 
+   return [x;t] 
+end
+
+function restrict!(z::V,x::W,t::N,k::I) where {V<:AbstractVector,N,I,W<:AbstractVector}
+    if k==1 
+        z[1]=t;z[2]=x;
+    else
+        z[1]=x;z[2]=t;
+    end
+    return z
 end
 
 
-function F1d(x,f,ψ_list,s_list,k,a,b,q)
+
+function F1d(x,f,ψ_list,s_list,k,a,b,x_ref,w_ref)
 
     f_tilde=t->f(restrict(x,t,k))
     ψ_list_tilde=[t->ψ(restrict(x,t,k)) for ψ in ψ_list]
 
-    return d1_int_f(f_tilde,ψ_list_tilde,s_list,[a,b],q)
+    return d1_int_f(f_tilde,ψ_list_tilde,s_list,[a,b],x_ref,w_ref)
 
 end
 
