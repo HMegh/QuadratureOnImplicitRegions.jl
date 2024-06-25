@@ -190,7 +190,7 @@ function algoim_quad(f::F,ψ_list,s_list::Vector{T},U::M,x_ref,w_ref,recursion_d
 
             if verbose
                 println("The domain: $(U[1,:]) x $(U[2,:]) was split into:") 
-                println("$(U1[1,:]) x $(U2[2,:]) and $(U1[1,:]) x $(U2[2,:])") 
+                println("$(U1[1,:]) x $(U1[2,:]) and $(U2[1,:]) x $(U2[2,:])") 
 
             end
 
