@@ -196,8 +196,8 @@ function algoim_quad(f::F,ψ_list,s_list::Vector{T},U::M,x_ref,w_ref,recursion_d
 
 
 
-            I1=algoim_quad(f,ψ_list,s_list,U1,x_ref,w_ref,recursion_depth+1)
-            I2=algoim_quad(f,ψ_list,s_list,U2,x_ref,w_ref,recursion_depth+1)
+            I1=algoim_quad(f,ψ_list,s_list,U1,x_ref,w_ref,recursion_depth+1;verbose=verbose)
+            I2=algoim_quad(f,ψ_list,s_list,U2,x_ref,w_ref,recursion_depth+1;verbose=verbose)
 
           
             
