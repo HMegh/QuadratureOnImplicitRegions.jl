@@ -69,19 +69,19 @@ end
 # d1_int_f(x->x^3,[x->x-1.5],[-1],[0,2],10)≈ 1.5^4/4
 
 
-function algoim_quad(f,ψ,sgn,a,b,q)
+function algoim_quad(f,ψ,sgn,a,b,q;verbose=false)
     U=vcat(a',b')
     x_ref,w_ref=gausslegendre(q)
 
 
-    return algoim_quad(f,[ψ],[sgn],U,x_ref,w_ref)
+    return algoim_quad(f,[ψ],[sgn],U,x_ref,w_ref;verbose=verbose)
 end
 
 
 
 
 
-function algoim_quad(f::F,ψ_list,s_list::Vector{T},U::M,x_ref,w_ref,recursion_depth=1) where {T<:Number,M<:AbstractMatrix,F<:Function}
+function algoim_quad(f::F,ψ_list,s_list::Vector{T},U::M,x_ref,w_ref,recursion_depth=1;verbose=false) where {T<:Number,M<:AbstractMatrix,F<:Function}
 
     #integrate a function f 
     d=size(U,2);
@@ -187,6 +187,12 @@ function algoim_quad(f::F,ψ_list,s_list::Vector{T},U::M,x_ref,w_ref,recursion_d
 
             U1[2,kk]=(U[1,kk]+U[2,kk])/2.0;
             U2[1,kk]=(U[1,kk]+U[2,kk])/2.0;
+
+            if verbose
+                println("The domain: $(U[1,:]) x $(U[2,:]) was split into:") 
+                println("$(U1[1,:]) x $(U2[2,:]) and $(U1[1,:]) x $(U2[2,:])") 
+
+            end
 
 
 
