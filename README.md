@@ -9,7 +9,7 @@ This package implements a quadrature method on implicitly defined regions follow
 
 ---
 
-# Simple examples: 
+## Examples: 
 
 Let $\Omega=[0,1]^2$ and let $\psi(x,y)=x^2+y^2-1$. Our goal is to create quadrature nodes and weights on the subdomains: 
 
