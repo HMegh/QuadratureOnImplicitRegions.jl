@@ -129,7 +129,7 @@ end
 """
     d1_case(ψ_list,s_list,domain,x_ref,w_ref)
 
-    Returns a quadrature rule on the subset where s_i*ψ_i<0 (see the paper).
+Returns a quadrature rule on the subset where s_i*ψ_i<0 (see the paper).
 """
 function  d1_case(ψ_list,s_list,domain,x_ref,w_ref)
     Z=find_roots(ψ_list,domain[1],domain[2])
@@ -162,13 +162,13 @@ end
 
 """
     tensor_GL_rule(U::Matrix{T},x_ref::Vector{T},w_ref::Vector{T})
-
-    Returns a matrix x and a vector w (multidimensional quadrature) 
-
-    Credit for the idea: 
-    https://discourse.julialang.org/t/about-storing-the-results-of-iterators-product-into-an-array-efficiently/115504
+    
+Returns a matrix x and a vector w (multidimensional quadrature)     
 """
 function tensor_GL_rule(U::Matrix{T},x_ref::Vector{T},w_ref::Vector{T}) where T
+    # Credit for the idea: 
+    #     https://discourse.julialang.org/t/about-storing-the-results-of-iterators-product-into-an-array-efficiently/115504
+
     d=size(U,2)
     n=size(x_ref,1)
 
@@ -188,7 +188,7 @@ end
 """
     linsamples_creator(U::Matrix{T},n::I) where {T,I}
     
-    returns sample points in the cuboid U (as columns).
+returns sample points in the cuboid U (as columns).
 """
 
 function linsamples_creator(U::Matrix{T},n::I) where {T,I}
