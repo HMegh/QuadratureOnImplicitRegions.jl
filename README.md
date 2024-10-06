@@ -61,7 +61,7 @@ For the outer region, we only need to change `-1.0` to `1.0`
 
 In the future, I plan on adding the following features/improvements. Suggestions and/or contributions are appreciated. 
 
-[ ] Add support for regions defined as $\psi(\mathbf{x})=0$ (e.g. sphere in $\mathbb{R}^3$). 
-[ ] Performance improvement: See the [v0.2.0 release notes](https://github.com/HMegh/QuadratureOnImplicitRegions.jl/releases/tag/v0.2.0) for a comparison with the previous release. This is still far from optimal. 
-[ ] Add the option to integrate a function $f$ without the need to store the integration nodes. This is useful when the nodes are not re-used. 
-[ ] Adaptivity? It would be cool to have a [QuadGK](https://juliamath.github.io/QuadGK.jl/stable/)-like function, where the error is estimated using a Gauss-Konrod rule. 
+- [ ] Add support for regions defined as $\psi(\mathbf{x})=0$ (e.g. sphere in $\mathbb{R}^3$). 
+- [ ] Performance improvement: See the [v0.2.0 release notes](https://github.com/HMegh/QuadratureOnImplicitRegions.jl/releases/tag/v0.2.0) for a comparison with the previous release. This is still far from optimal. 
+- [ ] Add the option to integrate a function $f$ without the need to store the integration nodes. This is useful when the nodes are not re-used. 
+- [ ] Adaptivity? It would be cool to have a [QuadGK](https://juliamath.github.io/QuadGK.jl/stable/)-like function, where the error is estimated using a Gauss-Konrod rule. 
