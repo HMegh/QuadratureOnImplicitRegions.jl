@@ -1,7 +1,7 @@
 name = "QuadratureOnImplicitRegions"
 uuid = "b906bd41-8a13-4c88-a09a-4b011115ea16"
 authors = ["Haroun Meghaichi"]
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 FastGaussQuadrature = "442a2c76-b920-505d-bb47-c5924d526838"
