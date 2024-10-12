@@ -7,7 +7,7 @@ function algoim_nodes_weights(ψ::F,sgn::N,a::Vector{T},b::Vector{S},q::I) where
     return algoim_nodes_weights([ψ], [sgn],U,x_ref,w_ref)
 end
 
-function algoim_nodes_weights(ψ_list::Vector{F},s_list::Vector{S},U::Matrix{T},q::I) where {T,F,S,I<:Integer}
+function algoim_nodes_weights(ψ_list::Vector{F},s_list::Vector{S},a::Vector{T},b::Vector{T},q::I) where {T,F,S,I<:Integer}
     x_ref,w_ref=gausslegendre(q)
     U=Float64.(vcat(a',b'))
     return algoim_nodes_weights(ψ_list,s_list,U,x_ref,w_ref)
