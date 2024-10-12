@@ -1,6 +1,8 @@
 # QuadratureOnImplicitRegions
 
 [![Build Status](https://github.com/hmegh/QuadratureOnImplicitRegions.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/hmegh/QuadratureOnImplicitRegions.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://hmegh.github.io/QuadratureOnImplicitRegions.jl/stable/)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://hmegh.github.io/QuadratureOnImplicitRegions.jl/dev/)
 
 This package implements a quadrature method on implicitly defined regions following the algorithm in: 
 
