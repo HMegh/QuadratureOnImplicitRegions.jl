@@ -12,6 +12,28 @@ find_roots(ψ_list::Vector{F},a::T,b::T) where {F,T<:Integer} = find_roots(ψ_li
     
 Finds a root of a function ψ in the open interval `(a,b)`
 """
+function find_root(ψ::F,a::T,b::T) where {F,T<:AbstractFloat}
+    if ψ(a)*ψ(b)≥0 error("Find_root failed: Choose a smaller interval") end 
+
+    maxiter=20
+    count_iter=0
+    c=b
+    cnext=(a+b)/2
+    while abs(c-cnext)>2eps(T)  && count_iter<maxiter
+        c=cnext
+        cnext=cnext-ψ(cnext)/ForwardDiff.derivative(ψ,cnext)
+        count_iter+=1
+    end
+    # if abs(c-cnext)>2eps(T)  throw(error("Newton iteration did not converge")) end 
+
+    if abs(c-cnext)>2eps(T) 
+        return bisection(ψ,a,b)
+    end
+
+    return c
+end
+
+
 function bisection(ψ::F,a::T,b::T) where {F,T}
     ψ_a,ψ_b=ψ(a),ψ(b) 
 
