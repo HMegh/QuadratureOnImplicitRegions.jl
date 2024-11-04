@@ -1,5 +1,4 @@
 
-$\newcommand{\x}{\mathbf{x}}$ 
 
 
 The following are multiple examples showcasing the use of the main function `algoim_nodes_weights`. 
@@ -15,7 +14,7 @@ $$\Omega_1=\{(x,y)\in [0,1]^2\mid  x^2+y^2<1\},\qquad
 
 Both regions are described by the __level-set__ function $\psi(\mathbf{x})=\Vert \mathbf{x}\Vert^2-1$. More precisely, 
 
-$$\Omega_1=\{(x,y)\in [0,1]^2\psi(\x)<0\},\qquad \Omega_1=\{(x,y)\in [0,1]^2\psi(\x)<0\}$$
+$$\Omega_1=\{(x,y)\in [0,1]^2\psi(\mathbf{x})<0\},\qquad \Omega_1=\{(x,y)\in [0,1]^2\psi(\mathbf{x})<0\}$$
 
 Now, to set up the problem, we define $\psi$, the domain $[0,1]\times [0,1]=[a_1,b_1]\times [a_2,b_2]$ and choose an order for the quadrature rule. 
 
