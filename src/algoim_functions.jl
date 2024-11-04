@@ -1,8 +1,8 @@
 sgn(m,s,σ)= ( m==σ*s ? σ*m : 0.0)
 
 find_root(ψ::F,a::T,b::T) where {F,T<:Number} = find_root(ψ,float(a),float(b))
-find_roots(ψ::F,a::T,b::T) where {F,T<:Number} = find_roots(ψ,float(a),float(b))
-find_roots(ψ_list::Vector{F},a::T,b::T) where {F,T<:Number} = find_roots(ψ_list,float(a),float(b))
+find_roots(ψ::F,a::T,b::T) where {F<:Function,T<:Number} = find_roots(ψ,float(a),float(b))
+find_roots(ψ_list::Vector{F},a::T,b::T) where {F<:Function,T<:Number} = find_roots(ψ_list,float(a),float(b))
 
 
 
@@ -12,7 +12,7 @@ find_roots(ψ_list::Vector{F},a::T,b::T) where {F,T<:Number} = find_roots(ψ_lis
     
 Finds a root of a function ψ in the open interval `(a,b)`
 """
-function find_root(ψ::F,a::T,b::T) where {F,T<:AbstractFloat}
+function find_root(ψ::F,a::T,b::T) where {F<:Function,T<:AbstractFloat}
     if ψ(a)*ψ(b)≥0 error("Find_root failed: Choose a smaller interval") end 
 
     maxiter=20
@@ -57,13 +57,46 @@ function bisection(ψ::F,a::T,b::T) where {F,T}
 
 end 
 
+"""
+    find_roots(ψ::F,a::T,b::T) where {F,T}
+
+Returns multiple roots of ψ in the open interval `[a,b]`
+"""
+function find_roots(ψ::F,a::T,b::T) where {F<:Function,T<:AbstractFloat}
+
+    n=10 #split the interval [a,b] into n sub-intervals
+    h=(b-a)/n
+    Z=Vector{Float64}(undef,0)
+    for i=0:n-1
+        if ψ(a+i*h)*ψ(a+(i+1)*h)<0 
+            z=find_root(ψ,a+i*h,a+(i+1)*h)
+            push!(Z,z)
+        end
+    end
+    
+    for i=1:n if ψ(a+i*h)==0 push!(Z,a+i*h) end end 
+
+    sort!(Z)
+
+    #remove duplicates
+    for i=length(Z):-1:2
+        if abs(Z[i]-Z[i-1])≤4eps(T)
+            deleteat!(Z,i)
+        end
+    end
+
+    return Z
+
+end
+
+
 
 """
     find_roots(ψ_list::Vector{F},a::T,b::T) where {F,T}
 
 Returns multiple roots of multiple functions ψ in the closed interval `[a,b]`, it includes the endpoints by default even if they are not roots. 
 """
-function find_roots(ψ_list::Vector{F},a::T,b::T) where {F,T}
+function find_roots(ψ_list::Vector{F},a::T,b::T) where {F<:Function,T<:AbstractFloat}
 
     n=20 #split the interval [a,b] into n sub-intervals
     h=(b-a)/n
