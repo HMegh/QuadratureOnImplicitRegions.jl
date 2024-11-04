@@ -105,10 +105,17 @@ end
 """ 
     d1_count_subintervals(ψ_list,s_list,domain)
 
-Counts how many sub-intervals of domain satisfiy s_iψ_i≥0
+Counts how many sub-intervals of domain satisfiy ``s_i ψ_i(x)≥0``
+Note: Preferably use `d1_count_subintervals(ψ_list,s_list,domain,roots)` if the roots are known.
 """
-function  d1_count_subintervals(ψ_list,s_list,domain)
+function d1_count_subintervals(ψ_list,s_list,domain)
     Z=find_roots(ψ_list,domain[1],domain[2])
+    return d1_count_subintervals(ψ_list,s_list,domain,roots)
+end
+
+
+
+function  d1_count_subintervals(ψ_list,s_list,domain,Z)
     cnt=0
 
     n=length(Z)

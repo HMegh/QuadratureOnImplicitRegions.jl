@@ -12,6 +12,7 @@ include("algoim.jl")
 
 # include("integrate_f.jl") #Needs some work
 include("algoim_functions.jl")
-
+include("structs.jl")
+include("low_dim.jl")
 
 end
