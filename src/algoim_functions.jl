@@ -15,12 +15,16 @@ Finds a root of a function ψ in the open interval `(a,b)`
 function find_root(ψ::F,a::T,b::T) where {F,T<:AbstractFloat}
     if ψ(a)*ψ(b)≥0 error("Find_root failed: Choose a smaller interval") end 
 
+    maxiter=20
+    count_iter=0
     c=b
     cnext=(a+b)/2
-    while abs(c-cnext)>4eps(T) 
+    while abs(c-cnext)>2eps(T)  && count_iter<maxiter
         c=cnext
         cnext=cnext-ψ(cnext)/ForwardDiff.derivative(ψ,cnext)
     end
+    if abs(c-cnext)>2eps(T)  throw(error("Newton's iteratiod di not converge")) end 
+    #TODO: If Newton fails, use bisection. 
     return c
 end
 
