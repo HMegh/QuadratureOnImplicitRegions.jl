@@ -1,8 +1,8 @@
 sgn(m,s,σ)= ( m==σ*s ? σ*m : 0.0)
 
-find_root(ψ::F,a::T,b::T) where {F,T<:Number} = find_root(ψ,Float64(a),Float64(b))
-find_roots(ψ::F,a::T,b::T) where {F,T<:Number} = find_roots(ψ,Float64(a),Float64(b))
-find_roots(ψ_list::Vector{F},a::T,b::T) where {F,T<:Integer} = find_roots(ψ_list,Float64(a),Float64(b))
+find_root(ψ::F,a::T,b::T) where {F,T<:Number} = find_root(ψ,float(a),float(b))
+find_roots(ψ::F,a::T,b::T) where {F,T<:Number} = find_roots(ψ,float(a),float(b))
+find_roots(ψ_list::Vector{F},a::T,b::T) where {F,T<:Number} = find_roots(ψ_list,float(a),float(b))
 
 
 
