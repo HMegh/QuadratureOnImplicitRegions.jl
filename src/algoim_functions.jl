@@ -12,49 +12,28 @@ find_roots(ψ_list::Vector{F},a::T,b::T) where {F,T<:Integer} = find_roots(ψ_li
     
 Finds a root of a function ψ in the open interval `(a,b)`
 """
-function find_root(ψ::F,a::T,b::T) where {F,T<:AbstractFloat}
-    if ψ(a)*ψ(b)≥0 error("Find_root failed: Choose a smaller interval") end 
+function bisection(ψ::F,a::T,b::T) where {F,T}
+    ψ_a,ψ_b=ψ(a),ψ(b) 
 
-    c=b
-    cnext=(a+b)/2
-    while abs(c-cnext)>4eps(T) 
-        c=cnext
-        cnext=cnext-ψ(cnext)/ForwardDiff.derivative(ψ,cnext)
-    end
-    return c
-end
+    if ψ_a*ψ_b>0 throw(error("bisection needs f(a)*f(b)<0")) end 
 
-"""
-    find_roots(ψ::F,a::T,b::T) where {F,T}
 
-Returns multiple roots of ψ in the open interval `[a,b]`
-"""
-function find_roots(ψ::F,a::T,b::T) where {F,T}
+    while abs(b-a)>eps(T)
+        c=(a+b)/2  
+        ψ_c=ψ(c)
+        if ψ_a==0.0 return a end 
+        if ψ_b==0.0 return b end 
 
-    n=10 #split the interval [a,b] into n sub-intervals
-    h=(b-a)/n
-    Z=Vector{Float64}(undef,0)
-    for i=0:n-1
-        if ψ(a+i*h)*ψ(a+(i+1)*h)<0 
-            z=find_root(ψ,a+i*h,a+(i+1)*h)
-            push!(Z,z)
-        end
-    end
-    
-    for i=1:n if ψ(a+i*h)==0 push!(Z,a+i*h) end end 
+        if ψ_a*ψ_c>0 
+            a,ψ_a=c,ψ_c
+        else 
+            b,ψ_b=c,ψ_c
+        end 
+    end 
+    return (a+b)/2
 
-    sort!(Z)
 
-    #remove duplicates
-    for i=length(Z):-1:2
-        if abs(Z[i]-Z[i-1])≤4eps(T)
-            deleteat!(Z,i)
-        end
-    end
-
-    return Z
-
-end
+end 
 
 
 """
