@@ -4,7 +4,7 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://hmegh.github.io/QuadratureOnImplicitRegions.jl/stable/)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://hmegh.github.io/QuadratureOnImplicitRegions.jl/dev/)
 
-This package implements a quadrature method on implicitly defined regions following the algorithm in: 
+This package implements a quadrature method on implicitly defined regions based on ideas from the algorithm in: 
 
 [R. I. Saye, High-Order Quadrature Methods for Implicitly Defined Surfaces and Volumes in Hyperrectangles, SIAM Journal on Scientific Computing, 37(2), A993-A1019 (2015).](https://epubs.siam.org/doi/10.1137/140966290).
 
@@ -32,7 +32,7 @@ xy1,w1=algoim_nodes_weights(ψ,-1.0, a,b,quad_order)
 #the nodes and weights on Ω₂
 xy2,w2=algoim_nodes_weights(ψ,+1.0, a,b,quad_order)
 ```
-To plot the nodes, please see [this tutorial](https://github.com/Hmegh/QuadratureOnImplicitRegions.jl/blob/main/tutorial/circle_and_sphere.jl).
+To plot the nodes, please see [this tutorial](https://github.com/Hmegh/QuadratureOnImplicitRegions.jl/blob/main/tutorial/circle_and_sphere.jl) and [the documentation](https://hmegh.github.io/QuadratureOnImplicitRegions.jl/stable/).
 
 <p align="center">
   <img src="https://github.com/Hmegh/QuadratureOnImplicitRegions.jl/assets/8241188/8926d082-3b1c-48cb-a888-3882b1288f7f" width="250" 
