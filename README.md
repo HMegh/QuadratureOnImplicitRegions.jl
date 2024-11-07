@@ -4,16 +4,21 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://hmegh.github.io/QuadratureOnImplicitRegions.jl/stable/)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://hmegh.github.io/QuadratureOnImplicitRegions.jl/dev/)
 
+
 This package implements a quadrature method on implicitly defined regions based on ideas from the algorithm in: 
 
 [R. I. Saye, High-Order Quadrature Methods for Implicitly Defined Surfaces and Volumes in Hyperrectangles, SIAM Journal on Scientific Computing, 37(2), A993-A1019 (2015).](https://epubs.siam.org/doi/10.1137/140966290).
 
 
-> **_NOTE:_**  For the original C++ implementation, see the [Algoim repo](https://github.com/algoim/algoim). Also, see the Julia wrapper in [Algoim.jl](https://github.com/ericneiva/Algoim.jl). 
-> 
+> **_NOTE:_**  For the original C++ implementation, see the [Algoim repo](https://github.com/algoim/algoim). Also, see the Julia wrapper in [Algoim.jl](https://github.com/ericneiva/Algoim.jl).
 ---
 
-## Examples: 
+# Alternative package
+Due to time constraints, I am no longer able to continue working on this project. Fortunately, there's another [Julia package](https://github.com/maltezfaria/ImplicitIntegration.jl) that implements the Algoim algorithm. It offers cleaner code and better performance than my implementation, so I highly recommend using it instead.
+
+---
+
+## Examples
 
 Let $\Omega=[0,1]^2$ and let $\psi(x,y)=x^2+y^2-1$. Our goal is to create quadrature nodes and weights on the subdomains: 
 
@@ -58,14 +63,3 @@ For the outer region, we only need to change `-1.0` to `1.0`
      height=auto/>
 </p>
 
-
----
-
-## Roadmap 
-
-In the future, I plan on adding the following features/improvements. Suggestions and/or contributions are appreciated. 
-
-- [ ] Add support for regions defined as $\psi(\mathbf{x})=0$ (e.g. sphere in $\mathbb{R}^3$). 
-- [ ] Performance improvement: See the [v0.2.0 release notes](https://github.com/HMegh/QuadratureOnImplicitRegions.jl/releases/tag/v0.2.0) for a comparison with the previous release. This is still far from optimal. 
-- [ ] Add the option to integrate a function $f$ without the need to store the integration nodes. This is useful when the nodes are not re-used. 
-- [ ] Adaptivity? It would be cool to have a [QuadGK](https://juliamath.github.io/QuadGK.jl/stable/)-like function, where the error is estimated using a Gauss-Konrod rule. 
